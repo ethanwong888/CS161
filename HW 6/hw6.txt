@@ -1,0 +1,188 @@
+Ethan Wong 
+UID 305319001
+
+HW 6
+
+1. For each pair of atomic sentences, give the most general unifier if it exists:
+  A) P(A, A, B), P(x, y, z)
+     θ = {x/A}
+     P(A, A, B), P(A, y, z)
+     θ = {y/A}
+     P(A, A, B), P(A, A, z)
+     θ = {z/B}
+     P(A, A, B), P(A, A, B)
+     The most general unifier is θ = {x/A, y/A, z/B}
+  
+  B) Q(y, G(A, B)), Q(G(x, x), y)
+     θ = {y/G(x, x)}
+     Q(y, G(A, B)), Q(G(x, x), G(x, x))
+     There is no unifier for this pair of atomic sentences.
+  
+  C) R(x,A,z) , R(B,y,z)
+     θ = {x/B}
+     R(B,A,z) , R(B,y,z)
+     θ = {y/A}
+     R(B,A,z) , R(B,A,z)
+     The most general unifier is θ = {x/B, y/A}
+
+  D) Older (Father(y), y), Older (Father(x), John)
+     θ = {x/y}
+     Older (Father(y), y), Older (Father(y), John)
+     θ = {y/John}
+     Older (Father(John), John), Older (Father(John), John)
+     The most general unifier is θ = {x/y, y/John}
+     It should be noted that another possible unifier is θ = {x/John, y/John}
+
+  E) Knows(Father(y),y), Knows(x,x)
+     θ = {Father(y)/x}
+     Knows(Father(y),y), Knows(Father(y),Father(y))
+     There is no unifier for this pair of atomic sentences.
+
+
+2.
+  A) Translate these sentences into formulas in first-order logic.
+    1 John likes all kinds of food.
+        (A x) (Food(x) => Likes(John, x))
+        # For all x, if x is a Food, John likes x
+    2 Apples are Food.
+        Food(Apples)
+    3 Chicken is Food.
+        Food(Chicken)
+    4 Anything someone eats and isn’t killed by is food.
+        (A x)(E y) (Eats(y,x) & ~Kills(x,y) => Food(x))
+        # if y eats x and x doesn't kill y, then x is Food. (x is edible)
+    5 If you are killed by something, you are not alive.
+        (A x)(E y) (Kills(y,x) => ~Alive(x))
+    6 Bill eats peanuts and is still alive. 
+        Eats(Bill, Peanuts) & Alive(Bill)
+    7 Sue eats everything Bill eats.
+        (A x)(Eats(Bill, x) => Eats(Sue, x))
+        # For all x (Food), if Bill eats x then Sue also eats X
+  
+  B) Convert the formulas of part (a) into CNF (also called clausal form).
+    1 (A x) (Food(x) => Likes(John, x))
+      (A x) (~Food(X) | Likes(John, x))
+      ~Food(x) | Likes(John, x)
+    2 Food(Apples)
+    3 Food(Chicken)
+    4 (A x)(E y) (Eats(y,x) & ~Kills(x,y) => Food(x))
+      (A x)(E y) (~(Eats(y,x) & ~Kills(x,y)) | Food(x))
+      (A x)(E y) (~Eats(y,x) | Kills(x,y) | Food(x))
+      ~Eats(F(x),x) | Kills(x, F(x)) | Food(x)
+    5 (A x)(E y) (Kills(y,x) => ~Alive(x))
+      (A x)(E y) (~Kills(y,x) | ~Alive(x))
+      ~Kills(F(x),x) | ~Alive(x)
+    6 Eats(Bill, Peanuts) 
+      Alive(Bill)
+    7 (A x)(Eats(Bill, x) => Eats(Sue, x))
+      (A x)(~Eats(Bill, x) | Eats(Sue, x))
+      ~Eats(Bill, x) | Eats(Sue, x)
+  
+  C) Prove that John likes peanuts using resolution.
+    CNF Rules - from part B [use θ = {y/F(x)} for simplicity]
+      1 ~Food(x) | Likes(John, x)
+      2 Food(Apples)
+      3 Food(Chicken)
+      4 ~Eats(y,x) | Kills(x,y) | Food(x)
+      5 ~Kills(y,x) | ~Alive(x)
+      6 Eats(Bill, Peanuts) 
+      7 Alive(Bill)
+      8 ~Eats(Bill, x) | Eats(Sue, x)
+    
+      9 ~Likes(John, Peanuts)     # include the negation of what we are trying to prove
+      10 [1 + 9] ~Food(Peanuts)   # θ = {x/Peanuts}
+      11 [4 + 10] ~Eats(y,Peanuts) | Kills(Peanuts,y)   # θ = {x/Peanuts}
+      12 [6 + 11] Kills(Peanuts, Bill)    # θ = {y/Bill}
+      13 [5 + 12] ~Alive(Bill)    # θ = {x/Bill, y/Peanuts}
+      There is a contradiction between rule 7 and rule 13 [Alive(Bill), ~Alive(Bill)].
+      This means that Δ & ~α is unsatisfiable and thus we have proven that John likes Peanuts.
+  
+  D) Use resolution to answer the question, “What does Sue eat?”
+    Use the same CNF Rules listed in part C
+      6 Eats(Bill, Peanuts)
+      8 ~Eats(Bill, x) | Eats(Sue, x)
+      14 [6 + 8] Eats(Sue, Peanuts)   # θ = {x/Peanuts}
+      We see in rule 14 that Sue eats Peanuts.
+  
+  E) 
+    First translate the new sentences.
+    1 If you don’t eat, you die.
+      (A x) (E y) (~Eats(x,y) => Dies(x))
+    2 If you die, you are not alive.
+      (A x) (Dies(x) => ~Alive(x))
+    3 Bill is alive.
+      Alive(Bill)
+    
+    Convert new sentences to CNF 
+    1 (A x) (E y) (~Eats(x,y) => Dies(x))
+      (A x) (E y) (Eats(x,y) | Dies(x))
+      (A x) (Eats(x,F(x)) | Dies(x))
+      Eats(x,F(x)) | Dies(x)
+      Eats(x,y) | Dies(x) [use θ = {y/F(x)} for simplicity]
+    2 (A x) (Dies(x) => ~Alive(x))
+      ~Dies(x) | ~Alive(x)
+    3 Alive(Bill)
+
+    New CNF Rules
+    1 ~Food(x) | Likes(John, x)
+    2 Food(Apples)
+    3 Food(Chicken)
+    4 ~Eats(y,x) | Kills(x,y) | Food(x)
+    5 ~Kills(y,x) | ~Alive(x)
+    6 Eats(x, y) | Dies(x)
+    7 ~Dies(x) | ~Alive(x)
+    8 Alive(Bill)
+    9 ~Eats(Bill, x) | Eats(Sue, x)
+
+    10 [7+8] ~Dies(Bill)    # θ = {x/Bill}
+    11 [6+10] Eats(Bill,y)  # θ = {x/Bill}
+    12 [9+11] Eats(Sue,y)   # θ = {x/y}
+
+    There are no more simplifications that we can do, so we can't actually conclude what Sue eats.
+
+
+3.
+  1) For Graph 1, the instance with 3 colors is unsatisfiable.
+  2) For Graph 1, the instance with 4 colors is satisfiable.
+  3) These answers tell us that the graph-coloring problem needs at least four colors to be solvable.
+     A possible result is as follows: 
+     -1 -2 -3 4 -5 -6 7 -8 -9 10 -11 -12 -13 -14 15 -16 17 -18 -19 -20 -21 22 -23 -24 25 -26 -27 -28
+     We can further analyze this result: 
+      - we have four colors, so k=4
+      - n can range from 1-7, as there are 7 nodes in the graph we are analyzing
+      - c can range from 1-4, since we have four colors 
+      - the variable index is given by: variable index = (n − 1) ∗ k + c
+      - we can now look at the positive values in the possible result seen above 
+          4 = (1 - 1) * 4 + c 
+            c = 4, node 1 was color #4
+          7 = (2 - 1) * 4 + c
+            c = 3, node 2 was color #3
+          10 = (3 - 1) * 4 + c
+            c = 2, node 3 was color #2
+          15 = (4 - 1) * 4 + c
+            c = 3, node 4 was color #3
+          17 = (5 - 1) * 4 + c
+            c = 1, node 5 was color #1
+          22 = (6 - 1) * 4 + c
+            c = 2, node 6 was color #2
+          25 = (6 - 1) * 4 + c
+            c = 1, node 7 was color #1
+  4) We need a minimum of 8 colors to properly color Graph 2.
+            
+  
+
+    
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+
